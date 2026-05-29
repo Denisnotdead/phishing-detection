@@ -1,14 +1,4 @@
-"""
-evaluator.py
-Loads the held-out test split, evaluates all models, and writes a structured JSON report.
-
-Report structure (reports/evaluation_report.json):
-    xgboost, bert, fusion — metrics + roc_curve + pr_curve
-    shap_feature_importances — feature -> mean_abs_shap
-    dataset_info — n_test, n_phishing, n_legitimate, sources
-
-Run: python -m src.evaluation.evaluator
-"""
+"""Evaluates all trained models on the held-out test set and writes a JSON report."""
 
 from __future__ import annotations
 

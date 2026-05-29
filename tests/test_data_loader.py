@@ -1,10 +1,4 @@
-"""
-tests/test_data_loader.py
-Smoke-test each dataset loader: load the file, print shape, class balance, and first two rows.
-Skips any file that does not exist so the script runs before all data is downloaded.
-
-Usage: python tests/test_data_loader.py
-"""
+"""Smoke-tests each dataset loader: checks shape, class balance, and sample rows."""
 
 from __future__ import annotations
 

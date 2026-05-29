@@ -1,10 +1,4 @@
-"""
-bert_classifier.py
-DistilBERT fine-tuning for binary phishing classification.
-
-DistilBERT is used instead of full BERT due to the 4 GB VRAM constraint of the RTX 3050.
-Training uses max_length=128, FP16 mixed precision, linear warmup, and early stopping.
-"""
+"""DistilBERT fine-tuned for binary phishing classification."""
 
 from __future__ import annotations
 

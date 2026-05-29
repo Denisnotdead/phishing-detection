@@ -1,8 +1,4 @@
-"""
-text_classifier.py
-XGBoost-based phishing classifier using hand-crafted features from feature_extractor.py.
-Handles feature extraction, scaling, SHAP explanation, and save/load internally.
-"""
+"""XGBoost phishing classifier with SHAP explainability."""
 
 from __future__ import annotations
 

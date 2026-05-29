@@ -1,10 +1,4 @@
-"""
-image_classifier.py
-EfficientNet-B0 fine-tuned for binary phishing screenshot classification.
-
-EfficientNet-B0 is chosen for its strong accuracy at low VRAM cost (4 GB RTX 3050 constraint).
-Only the top classifier and last two feature blocks are unfrozen during fine-tuning.
-"""
+"""EfficientNet-B0 fine-tuned for binary phishing screenshot classification."""
 
 from __future__ import annotations
 

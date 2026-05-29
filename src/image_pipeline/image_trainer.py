@@ -1,18 +1,4 @@
-"""
-image_trainer.py
-Training and inference entry points for the image-based phishing detection pipeline.
-
-Two modes:
-    train     — fine-tune EfficientNet-B0 on labelled phishing/legitimate screenshots
-    ocr_bert  — extract text via EasyOCR then classify with the saved DistilBERT model
-
-Expected dataset layout for train mode:
-    data/raw/images/phishing/      screenshot_001.png ...
-    data/raw/images/legitimate/    screenshot_001.png ...
-
-Run: python -m src.image_pipeline.image_trainer --mode train
-     python -m src.image_pipeline.image_trainer --mode ocr_bert --images data/raw/images/unknown/
-"""
+"""Training and OCR-BERT inference entry points for the image phishing pipeline."""
 
 from __future__ import annotations
 

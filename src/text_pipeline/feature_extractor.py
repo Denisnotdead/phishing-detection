@@ -1,8 +1,4 @@
-"""
-feature_extractor.py
-Extracts URL, statistical text, and structural/header features for phishing detection.
-Exposes sklearn-compatible transformers and a convenience build_feature_matrix() function.
-"""
+"""Extracts URL, text, and structural features for phishing classification."""
 
 from __future__ import annotations
 

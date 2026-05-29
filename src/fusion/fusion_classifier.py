@@ -1,10 +1,4 @@
-"""
-fusion_classifier.py
-LightGBM meta-classifier that combines XGBoost, DistilBERT, and image signals into one score.
-
-Input features: xgb_prob, bert_prob, ocr_confidence, is_image_input.
-Falls back to a weighted average when no trained model is available.
-"""
+"""LightGBM meta-classifier that fuses XGBoost, DistilBERT, and image signals into one score."""
 
 from __future__ import annotations
 

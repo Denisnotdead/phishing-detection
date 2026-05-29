@@ -1,10 +1,4 @@
-"""
-ocr_extractor.py
-Extracts text from phishing-related images using EasyOCR with preprocessing.
-
-EasyOCR initialisation downloads language models on the first run and is expensive,
-so the Reader is created lazily and shared across calls within one OCRExtractor instance.
-"""
+"""Extracts text from images using EasyOCR with image preprocessing."""
 
 from __future__ import annotations
 

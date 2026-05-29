@@ -1,18 +1,4 @@
-"""
-scan_image.py
-Runs phishing detection on one image or a directory of images.
-
-Three modes via --mode:
-    fusion (default) — XGBoost + DistilBERT + LightGBM fusion
-    bert             — OCR + DistilBERT only
-    xgb              — OCR + XGBoost only
-
-Usage:
-    python scripts/scan_image.py                              # fusion, all images
-    python scripts/scan_image.py screenshot.png               # fusion, one image
-    python scripts/scan_image.py --mode bert                  # BERT only, all images
-    python scripts/scan_image.py --mode xgb screenshot.png    # XGBoost only, one image
-"""
+"""Scans one image or a directory for phishing content using OCR and ML models."""
 
 from __future__ import annotations
 

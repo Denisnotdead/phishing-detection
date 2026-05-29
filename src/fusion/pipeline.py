@@ -1,10 +1,4 @@
-"""
-pipeline.py
-Unified phishing detection pipeline that routes text or image input through all sub-models.
-
-All models are loaded lazily on the first analyze() call; missing checkpoints are skipped
-so the pipeline degrades gracefully before all models are trained.
-"""
+"""Unified phishing detection pipeline routing text or image input through all sub-models."""
 
 from __future__ import annotations
 

@@ -1,11 +1,4 @@
-"""
-explainability.py
-SHAP-based explainability for XGBoost and attention-based visualisation for DistilBERT.
-
-XGBExplainer: global SHAP summary bar chart and per-sample waterfall plots.
-BERTAttentionVisualizer: last-block attention overlaid on input tokens as a colour grid.
-All plots are saved to the reports directory for direct use in the dissertation.
-"""
+"""SHAP explainability for XGBoost and attention visualisation for DistilBERT."""
 
 from __future__ import annotations
 

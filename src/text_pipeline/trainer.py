@@ -1,10 +1,4 @@
-"""
-trainer.py
-End-to-end training script: loads data, trains XGBoost + DistilBERT, evaluates the ensemble.
-
-Run from the project root:
-    python -m src.text_pipeline.trainer
-"""
+"""End-to-end training script for XGBoost and DistilBERT phishing classifiers."""
 
 from __future__ import annotations
 

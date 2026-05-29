@@ -1,8 +1,4 @@
-"""
-data_loader.py
-Loads and preprocesses phishing/legitimate email, SMS, and URL datasets.
-Returns tidy DataFrames with columns: text, label (int), source, type.
-"""
+"""Loads and preprocesses phishing datasets from email, SMS, and URL sources."""
 
 from __future__ import annotations
 
