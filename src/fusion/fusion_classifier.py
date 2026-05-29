@@ -1,4 +1,4 @@
-"""LightGBM meta-classifier that fuses XGBoost, DistilBERT, and image signals into one score."""
+"""LightGBM meta-classifier combining XGBoost, DistilBERT and OCR signals."""
 
 from __future__ import annotations
 

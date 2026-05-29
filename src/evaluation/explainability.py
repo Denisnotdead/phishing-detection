@@ -1,4 +1,4 @@
-"""SHAP explainability for XGBoost and attention visualisation for DistilBERT."""
+"""SHAP and attention visualisations for XGBoost and DistilBERT."""
 
 from __future__ import annotations
 

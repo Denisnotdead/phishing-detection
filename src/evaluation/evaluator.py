@@ -1,4 +1,4 @@
-"""Evaluates all trained models on the held-out test set and writes a JSON report."""
+"""Evaluates all models and saves results to reports/."""
 
 from __future__ import annotations
 
