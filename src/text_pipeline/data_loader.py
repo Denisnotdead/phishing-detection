@@ -11,7 +11,7 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-# Candidate column names in priority order for each semantic role
+# candidate column names per semantic role
 _LABEL_CANDIDATES = [
     "label", "Label", "LABEL",
     "class", "Class",
@@ -35,7 +35,7 @@ _SUBJECT_CANDIDATES = ["subject", "Subject", "SUBJECT"]
 _SENDER_CANDIDATES  = ["sender", "Sender", "from", "From", "FROM"]
 _DATE_CANDIDATES    = ["date", "Date", "DATE"]
 
-# Canonical label mappings (lower-cased string → int)
+# canonical label mappings (str → int)
 _LABEL_MAP: dict[str, int] = {
     "spam": 1, "phishing": 1, "phishing email": 1,
     "malicious": 1, "fraud": 1, "scam": 1,
@@ -283,10 +283,10 @@ def preprocess_dataframe(
     """Apply cleaning steps to the text column; adds a urls column with extracted URLs."""
     df = df.copy()
 
-    # Fill NaN before text processing so nothing downstream receives a float
+    # fill NaN before text processing
     df["text"] = df["text"].fillna("")
 
-    # Extract URLs before cleaning modifies the text
+    # extract URLs before cleaning modifies the text
     df["urls"] = df["text"].apply(lambda x: extract_urls(x) if isinstance(x, str) else [])
 
     df["text"] = df["text"].apply(
@@ -313,7 +313,7 @@ _DEFAULT_EMAIL_DIR = Path("data/raw/emails")
 _DEFAULT_SMS_FILE  = Path("data/raw/sms_spam/SMSSpamCollection")
 _DEFAULT_URL_FILE  = Path("data/raw/urls/malicious_phish.csv")
 
-# Maps filename stem → loader function for every email CSV
+# filename stem → loader function
 _EMAIL_LOADERS: dict[str, callable] = {
     "CEAS_08":        load_ceas08,
     "Enron":          load_enron,
@@ -333,10 +333,7 @@ def load_all(
     preprocess: bool = True,
     **preprocess_kwargs,
 ) -> pd.DataFrame:
-    """Load all datasets and return a single concatenated DataFrame.
-
-    Each path defaults to the canonical project location; pass None to skip a source.
-    """
+    """Load all datasets and return a single concatenated DataFrame."""
     frames: list[pd.DataFrame] = []
 
     # Load email CSVs

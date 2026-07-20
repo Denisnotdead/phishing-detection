@@ -98,10 +98,7 @@ def _run_xgb_on_image(
 
 
 def _make_runner(mode: str, models_dir: Path):
-    """Load models for the given mode and return a callable that processes one image path.
-
-    Models are loaded once so scan_directory() can reuse them across all images.
-    """
+    """Load models for the mode and return a callable that processes one image path."""
     if mode == "fusion":
         pipeline = PhishingDetectionPipeline(models_dir=models_dir)
         def run_fusion(image_path: Path) -> dict:

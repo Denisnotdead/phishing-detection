@@ -33,8 +33,7 @@ DEFAULT_MODELS_DIR  = PROJECT_ROOT / "models"
 DEFAULT_REPORTS_DIR = PROJECT_ROOT / "reports"
 DEFAULT_PROCESSED   = PROJECT_ROOT / "data" / "processed" / "combined_dataset.csv"
 
-# BERT inference is slow, so evaluation is capped at this many test samples.
-# XGBoost evaluates on the full test set.
+# cap BERT eval samples (slow inference); XGBoost uses the full test set
 DEFAULT_BERT_EVAL_SAMPLES = 5_000
 
 
@@ -58,14 +57,11 @@ class PhishingEvaluator:
         self.random_state      = random_state
 
     def load_test_data(self) -> pd.DataFrame:
-        """Load the test split, regenerating from raw data if the processed CSV is missing.
-
-        The split parameters must match those used in trainer.py to get identical test rows.
-        """
+        """Load the test split, regenerating from raw data if the processed CSV is missing."""
         if self.processed_path.exists():
             logger.info("Loading processed dataset from %s ...", self.processed_path)
             df = pd.read_csv(self.processed_path, low_memory=False)
-            # urls are saved as pipe-delimited strings in the EDA notebook; restore lists
+            # restore urls saved as pipe-delimited strings
             if "urls" in df.columns:
                 df["urls"] = df["urls"].fillna("").apply(
                     lambda s: s.split("|") if isinstance(s, str) and s else []
@@ -157,8 +153,7 @@ class PhishingEvaluator:
         y_prob  = clf.predict_proba(df_test)[:, 1]
         metrics = self._compute_metrics(y_true, y_prob, "XGBoost")
 
-        # Compute SHAP values; _transform applies _build_features AND the fitted scaler
-        # which matches exactly what the model saw during training
+        # compute SHAP values on the same transformed features the model saw
         try:
             X_scaled    = clf._transform(df_test)
             shap_values = clf._explainer.shap_values(X_scaled)
@@ -178,17 +173,14 @@ class PhishingEvaluator:
             logger.warning("SHAP computation failed: %s", exc)
             metrics["shap_feature_importances"] = {}
 
-        # Attach for use by explainability.py (not serialised to JSON)
+        # attach for explainability.py (not serialised)
         metrics["_clf"]    = clf
         metrics["_y_prob"] = y_prob
 
         return metrics
 
     def evaluate_bert(self, df_test: pd.DataFrame) -> dict:
-        """Load and evaluate PhishingBERTClassifier on a stratified sample of the test set.
-
-        Uses a sample of bert_eval_samples rows because BERT inference is slow on a 4 GB GPU.
-        """
+        """Load and evaluate PhishingBERTClassifier on a stratified sample of the test set."""
         from src.text_pipeline.bert_classifier import PhishingBERTClassifier
 
         bert_dir = self.models_dir / "bert_phishing"
@@ -201,9 +193,7 @@ class PhishingEvaluator:
                 "Sampling %d of %d test rows for BERT evaluation.",
                 self.bert_eval_samples, len(df_test),
             )
-            # Sample each class separately to preserve index alignment with df_test.
-            # Do NOT call reset_index — evaluate_fusion relies on the original df_test
-            # row positions to align XGBoost and BERT probabilities correctly.
+            # sample per class; do NOT reset_index (evaluate_fusion aligns on original positions)
             per_class = self.bert_eval_samples // 2
             phishing_rows = df_test[df_test["label"] == 1].sample(
                 min(int((df_test["label"] == 1).sum()), per_class),
@@ -238,10 +228,7 @@ class PhishingEvaluator:
         bert_proba: np.ndarray,
         bert_df: pd.DataFrame,
     ) -> dict:
-        """Evaluate the fusion classifier using pre-computed XGBoost and BERT probabilities.
-
-        ocr_confidence is set to 0.5 (neutral) and is_image_input to 0 for the text-only test set.
-        """
+        """Evaluate the fusion classifier using pre-computed XGBoost and BERT probabilities."""
         from src.fusion.fusion_classifier import FusionClassifier, FEATURE_COLS
 
         # Log file existence for debugging
@@ -256,8 +243,7 @@ class PhishingEvaluator:
         logger.info("  bert_phishing/     exists   : %s  (%s)", bert_dir.exists(),  bert_dir)
         logger.info("  fusion_classifier.pkl exists: %s  (%s)", fusion_file.exists(), fusion_file)
 
-        # Align on index — bert_df carries original df_test row positions (no reset_index
-        # was called in evaluate_bert) so xgb_proba[bert_index] pulls the matching XGBoost score
+        # align on index — bert_df carries original df_test positions
         bert_index = bert_df.index
         xgb_sub    = xgb_proba[bert_index]
         y_true     = df_test["label"].values[bert_index].astype(int)
@@ -340,10 +326,7 @@ class PhishingEvaluator:
         print()
 
     def save_report(self, report: dict) -> Path:
-        """Write evaluation results to reports_dir/evaluation_report.json.
-
-        Strips classification_report strings and private _clf/_y_prob/_df_eval keys.
-        """
+        """Write evaluation results to reports_dir/evaluation_report.json."""
         self.reports_dir.mkdir(parents=True, exist_ok=True)
 
         def clean(d: dict) -> dict:

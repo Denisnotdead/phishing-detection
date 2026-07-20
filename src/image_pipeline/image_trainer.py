@@ -39,10 +39,7 @@ def load_image_dataset(
     test_size: float = 0.15,
     random_state: int = 42,
 ) -> tuple[list, list, list, list, list, list]:
-    """Scan image_dir for phishing/ and legitimate/ sub-folders and build stratified splits.
-
-    Returns six lists: train_paths, train_labels, val_paths, val_labels, test_paths, test_labels.
-    """
+    """Scan image_dir for phishing/ and legitimate/ sub-folders and build stratified splits."""
     image_dir = Path(image_dir)
     phishing_dir   = image_dir / "phishing"
     legitimate_dir = image_dir / "legitimate"
@@ -151,12 +148,8 @@ def classify_with_ocr_bert(
     confidence_threshold: float = 0.3,
     output_csv: bool = True,
 ) -> pd.DataFrame:
-    """OCR-to-BERT inference for classifying screenshots without a trained image model.
-
-    Runs EasyOCR on each image, then classifies the extracted text with DistilBERT.
-    Returns a DataFrame with path, ocr_text, phishing_prob, and predicted_label columns.
-    """
-    # Deferred import to avoid hard dependency when only training path is used
+    """OCR-to-BERT inference for classifying screenshots without a trained image model."""
+    # lazy import: avoid hard dependency for the training path
     from src.text_pipeline.bert_classifier import PhishingBERTClassifier
 
     bert_model_dir = Path(bert_model_dir)
@@ -179,7 +172,7 @@ def classify_with_ocr_bert(
 
     texts = [r["full_text"] for r in ocr_results]
 
-    # Images with no OCR text get blank input; BERT will predict near the prior
+    # blank OCR text → BERT predicts near the prior
     df_input = pd.DataFrame({"text": texts})
     probas = bert_clf.predict_proba(df_input)[:, 1]
     preds  = (probas >= 0.5).astype(int)

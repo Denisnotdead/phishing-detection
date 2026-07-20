@@ -168,10 +168,7 @@ class PhishingXGBClassifier:
         df_row: pd.DataFrame,
         top_n: int = 10,
     ) -> dict:
-        """Return top SHAP features driving the prediction for a single sample.
-
-        Positive SHAP values push toward phishing; negative toward legitimate.
-        """
+        """Return top SHAP features driving the prediction for a single sample."""
         if self._explainer is None:
             raise RuntimeError("Model has not been fitted yet. Call fit() first.")
 

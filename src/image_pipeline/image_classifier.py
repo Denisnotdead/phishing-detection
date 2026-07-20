@@ -53,10 +53,7 @@ class PhishingImageDataset(Dataset):
 
 
 def build_train_transform() -> transforms.Compose:
-    """Build the augmentation transform used during training.
-
-    Augmentations simulate real screenshot variation: rotations, crops, brightness/saturation shifts.
-    """
+    """Build the augmentation transform used during training."""
     return transforms.Compose([
         transforms.Resize((INPUT_SIZE + 32, INPUT_SIZE + 32)),
         transforms.RandomCrop(INPUT_SIZE),
@@ -69,10 +66,7 @@ def build_train_transform() -> transforms.Compose:
 
 
 def build_eval_transform() -> transforms.Compose:
-    """Build the deterministic transform for validation and inference.
-
-    Uses ImageNet statistics matching the pretrained EfficientNet weights.
-    """
+    """Build the deterministic transform for validation and inference."""
     return transforms.Compose([
         transforms.Resize((INPUT_SIZE, INPUT_SIZE)),
         transforms.ToTensor(),
@@ -81,10 +75,7 @@ def build_eval_transform() -> transforms.Compose:
 
 
 class PhishingImageClassifier:
-    """EfficientNet-B0 phishing screenshot classifier with two-phase fine-tuning.
-
-    Public interface mirrors PhishingBERTClassifier for interchangeable use in the ensemble.
-    """
+    """EfficientNet-B0 phishing screenshot classifier with two-phase fine-tuning."""
 
     def __init__(
         self,
@@ -108,10 +99,7 @@ class PhishingImageClassifier:
         self._model: Optional[nn.Module] = None
 
     def _build_model(self) -> nn.Module:
-        """Load pretrained EfficientNet-B0 and replace the classifier head for binary classification.
-
-        All layers start frozen; they are selectively unfrozen in fit().
-        """
+        """Load pretrained EfficientNet-B0 and swap in a binary classifier head."""
         model = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
 
         for param in model.parameters():
@@ -182,7 +170,7 @@ class PhishingImageClassifier:
 
         for epoch in range(1, self.epochs + 1):
 
-            # After warmup, unfreeze deeper layers and rebuild optimizer with new params
+            # after warmup: unfreeze deeper layers and rebuild optimizer
             if epoch == self.warmup_epochs + 1:
                 logger.info("Epoch %d: unfreezing top EfficientNet blocks.", epoch)
                 self._unfreeze_top_blocks(self._model)

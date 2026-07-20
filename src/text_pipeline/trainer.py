@@ -56,7 +56,7 @@ def split_dataset(
         random_state=random_state,
     )
 
-    # Adjust val fraction to be relative to the remaining train_val pool
+    # make val fraction relative to the remaining pool
     val_fraction_of_remainder = val_size / (1.0 - test_size)
     df_train, df_val = train_test_split(
         df_train_val,
@@ -81,10 +81,7 @@ def evaluate_ensemble(
     label_col: str = "label",
     threshold: float = 0.5,
 ) -> dict:
-    """Combine XGBoost and BERT probabilities via weighted soft voting and compute metrics.
-
-    Weights are normalised so the threshold interpretation is consistent regardless of values passed.
-    """
+    """Combine XGBoost and BERT probabilities via weighted soft voting and compute metrics."""
     total  = xgb_weight + bert_weight
     w_xgb  = xgb_weight / total
     w_bert = bert_weight / total
@@ -195,10 +192,7 @@ def train(
     random_state: int = 42,
     skip_bert: bool = False,
 ) -> dict:
-    """Full training run: load data, train both models, evaluate the ensemble.
-
-    Set skip_bert=True for fast iteration when VRAM is unavailable.
-    """
+    """Full training run: load data, train both models, evaluate the ensemble."""
     models_dir  = Path(models_dir)
     reports_dir = Path(reports_dir)
 

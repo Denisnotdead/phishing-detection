@@ -19,7 +19,7 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader, Dataset
 from transformers import (
     AutoModelForSequenceClassification,
@@ -62,10 +62,7 @@ class PhishingEmailDataset(Dataset):
 
 
 class PhishingBERTClassifier:
-    """DistilBERT-based phishing classifier with training loop and save/load support.
-
-    Public interface mirrors PhishingXGBClassifier for interchangeable use in the ensemble.
-    """
+    """DistilBERT-based phishing classifier with training loop and save/load support."""
 
     def __init__(
         self,
@@ -154,7 +151,7 @@ class PhishingBERTClassifier:
         )
 
         # FP16 on CUDA cuts VRAM usage roughly in half
-        scaler = GradScaler(enabled=(self.device.type == "cuda"))
+        scaler = GradScaler("cuda", enabled=(self.device.type == "cuda"))
 
         best_val_loss = float("inf")
         epochs_without_improvement = 0
@@ -202,12 +199,12 @@ class PhishingBERTClassifier:
             batch = {k: v.to(self.device) for k, v in batch.items()}
             optimizer.zero_grad()
 
-            with autocast(enabled=(self.device.type == "cuda")):
+            with autocast("cuda", enabled=(self.device.type == "cuda")):
                 outputs = self._model(**batch)
                 loss = outputs.loss
 
             scaler.scale(loss).backward()
-            # Gradient clipping prevents exploding gradients during fine-tuning
+            # gradient clipping
             scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(self._model.parameters(), max_norm=1.0)
             scaler.step(optimizer)
@@ -227,7 +224,7 @@ class PhishingBERTClassifier:
         with torch.no_grad():
             for batch in loader:
                 batch = {k: v.to(self.device) for k, v in batch.items()}
-                with autocast(enabled=(self.device.type == "cuda")):
+                with autocast("cuda", enabled=(self.device.type == "cuda")):
                     outputs = self._model(**batch)
 
                 total_loss += outputs.loss.item()
@@ -269,7 +266,7 @@ class PhishingBERTClassifier:
         with torch.no_grad():
             for batch in loader:
                 batch = {k: v.to(self.device) for k, v in batch.items()}
-                with autocast(enabled=(self.device.type == "cuda")):
+                with autocast("cuda", enabled=(self.device.type == "cuda")):
                     logits = self._model(**batch).logits
                 probs = torch.softmax(logits, dim=-1).cpu().numpy()
                 all_probs.append(probs)

@@ -14,10 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class ImagePreprocessor:
-    """Prepares a raw screenshot for OCR via resize, contrast boost, sharpening, and denoising.
-
-    Default settings are tuned for 72–96 dpi screenshots that may be JPEG-compressed.
-    """
+    """Prepare a raw screenshot for OCR (resize, contrast, sharpen, denoise)."""
 
     def __init__(
         self,
@@ -86,10 +83,7 @@ class ImagePreprocessor:
 
 
 class OCRExtractor:
-    """Extracts text from images using EasyOCR with optional preprocessing.
-
-    The EasyOCR Reader is initialised lazily on the first extract() call.
-    """
+    """Extract text from images using EasyOCR with optional preprocessing."""
 
     def __init__(
         self,
@@ -103,7 +97,7 @@ class OCRExtractor:
         self.confidence_threshold = confidence_threshold
         self.preprocessor = preprocessor if preprocessor is not None else ImagePreprocessor()
 
-        # Deferred to avoid slow import and model-download cost at startup
+        # lazy: avoid slow import / model download at startup
         self._reader = None
 
     def _get_reader(self):
@@ -127,10 +121,7 @@ class OCRExtractor:
         return self._reader
 
     def extract(self, image_input: str | Path | np.ndarray | Image.Image) -> dict:
-        """Run preprocessing and OCR on a single image.
-
-        Returns a dict with full_text, detections, n_detections, and mean_confidence.
-        """
+        """Run preprocessing and OCR on a single image."""
         preprocessed = self.preprocessor.process(image_input)
         reader = self._get_reader()
 

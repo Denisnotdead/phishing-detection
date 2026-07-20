@@ -20,11 +20,7 @@ DEFAULT_REPORTS_DIR = Path("reports")
 
 
 class XGBExplainer:
-    """SHAP-based explainability for PhishingXGBClassifier.
-
-    Produces a global summary bar chart and per-sample waterfall plots for the
-    top phishing and top legitimate examples.
-    """
+    """SHAP-based explainability for PhishingXGBClassifier."""
 
     def __init__(self, clf, reports_dir: str | Path = DEFAULT_REPORTS_DIR):
         self._clf = clf
@@ -58,8 +54,7 @@ class XGBExplainer:
         X = self._build_feature_matrix(df)
         shap_values = self._clf._explainer.shap_values(X)
 
-        # TreeExplainer returns a list of arrays (one per class) for binary classification;
-        # take the phishing-class values (index 1)
+        # TreeExplainer returns one array per class; take phishing (index 1)
         if isinstance(shap_values, list):
             return shap_values[1]
         return shap_values
@@ -135,11 +130,7 @@ class XGBExplainer:
         filename: str,
         top_n: int = 12,
     ) -> Path:
-        """Draw a manual waterfall plot for a single sample.
-
-        Drawn manually for broad SHAP version compatibility and full styling control.
-        Red bars push toward phishing; blue bars push toward legitimate.
-        """
+        """Draw a manual waterfall plot for a single sample."""
         order = np.argsort(np.abs(shap_vals_row))[::-1]
         top_idx  = order[:top_n]
         rest_idx = order[top_n:]
@@ -303,11 +294,7 @@ class XGBExplainer:
 
 
 class BERTAttentionVisualizer:
-    """Attention-based explainability for PhishingBERTClassifier.
-
-    Extracts last-block attention weights, averages across heads, and renders
-    a colour-coded word-importance grid saved to the reports directory.
-    """
+    """Attention-based explainability for PhishingBERTClassifier."""
 
     def __init__(self, clf, reports_dir: str | Path = DEFAULT_REPORTS_DIR):
         self._clf = clf
@@ -317,11 +304,7 @@ class BERTAttentionVisualizer:
     def _get_attention_and_tokens(
         self, text: str, max_length: int = 128
     ) -> tuple[list[str], np.ndarray]:
-        """Run one forward pass and return tokens with their CLS-attention scores.
-
-        Reloads the model with attn_implementation='eager' because the default SDPA backend
-        does not support output_attentions=True (raises 'tuple index out of range').
-        """
+        """Run one forward pass and return tokens with their CLS-attention scores."""
         import torch
         from transformers import AutoModelForSequenceClassification
 
@@ -371,7 +354,7 @@ class BERTAttentionVisualizer:
                     f"Output fields: {[k for k in outputs.keys() if outputs[k] is not None] if hasattr(outputs, 'keys') else 'N/A'}."
                 )
 
-            # outputs.attentions: tuple, one tensor per block, shape (batch, heads, seq, seq)
+            # one attention tensor per block: (batch, heads, seq, seq)
             last_attn = outputs.attentions[-1]
 
         except (IndexError, TypeError) as exc:
@@ -385,7 +368,7 @@ class BERTAttentionVisualizer:
                 "Make sure attn_implementation='eager' was applied correctly."
             ) from exc
 
-        # Average across heads; use CLS column (how much each token attended to CLS)
+        # average across heads, take the CLS column
         mean_attn = last_attn[0].mean(dim=0).cpu().numpy()
         cls_col   = mean_attn[:, 0]
 
@@ -444,10 +427,7 @@ class BERTAttentionVisualizer:
         max_length: int = 128,
         top_n_words: int = 30,
     ) -> Path:
-        """Save a colour-coded word importance chart for one input text.
-
-        Background colour scales from white (no attention) to deep red (high attention).
-        """
+        """Save a colour-coded word importance chart for one input text."""
         tokens, attn = self._get_attention_and_tokens(text, max_length=max_length)
         words, importance = self._tokens_to_importance(tokens, attn)
 

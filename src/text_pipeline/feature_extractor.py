@@ -37,7 +37,7 @@ _SUSPICIOUS_TLDS = {
     "science", "work", "party", "link",
 }
 
-# High-value brand keywords often spoofed in phishing domains
+# brand keywords often spoofed in phishing
 _BRAND_KEYWORDS = {
     "paypal", "apple", "google", "amazon", "microsoft", "facebook",
     "netflix", "ebay", "instagram", "twitter", "bank", "secure",
@@ -104,11 +104,7 @@ def _zero_url_features() -> dict:
 
 
 def extract_url_features(url: str) -> dict:
-    """Extract a fixed-size feature dictionary from a single URL string.
-
-    All operations are individually guarded; returns zeros on any failure so
-    the pipeline never crashes on malformed input.
-    """
+    """Extract a fixed-size feature dictionary from a single URL string."""
     try:
         if not isinstance(url, str):
             url = ""
@@ -131,7 +127,7 @@ def extract_url_features(url: str) -> dict:
         path  = parsed.path  or ""
         query = parsed.query or ""
 
-        # parsed.port raises ValueError for out-of-range ports that phishing URLs sometimes use
+        # parsed.port raises ValueError for out-of-range ports
         try:
             has_port = int(bool(parsed.port))
         except ValueError:
@@ -252,10 +248,7 @@ def extract_text_features(text: str) -> dict:
 
 
 def extract_structural_features(row: pd.Series) -> dict:
-    """Extract email header and structural features from a DataFrame row.
-
-    SMS rows receive zero/NaN for email-only features.
-    """
+    """Extract email header and structural features from a DataFrame row."""
     is_email = str(row.get("type", "sms")) == "email"
     sender = str(row.get("sender", "")) if is_email else ""
     subject = str(row.get("subject", "")) if is_email else ""
@@ -403,10 +396,7 @@ def build_feature_matrix(
     include_tfidf: bool = False,
     scale: bool = True,
 ) -> np.ndarray:
-    """Extract and optionally scale all hand-crafted feature groups from a preprocessed DataFrame.
-
-    TF-IDF is excluded by default (sparse matrix); use TfidfTextTransformer separately.
-    """
+    """Extract and optionally scale all hand-crafted feature groups."""
     if include_tfidf:
         raise NotImplementedError(
             "TF-IDF features return a sparse matrix. "

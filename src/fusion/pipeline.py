@@ -14,8 +14,7 @@ from src.text_pipeline.data_loader import extract_urls
 
 logger = logging.getLogger(__name__)
 
-# Email client UI chrome that OCR often picks up from screenshots.
-# These phrases carry no phishing signal and are stripped before classification.
+# email-client UI chrome OCR picks up; stripped before classification
 UI_NOISE_WORDS = [
     "Compose", "Inbox", "Starred", "Snoozed", "Sent", "Drafts", "More",
     "Labels", "Reply", "Forward", "Search mail", "Personal", "Reports",
@@ -24,11 +23,7 @@ UI_NOISE_WORDS = [
 
 
 def remove_ui_noise(text: str) -> str:
-    """Strip email client UI chrome from OCR-extracted text.
-
-    Matching is case-sensitive and whole-phrase so legitimate words sharing a
-    substring with a noise phrase are left intact (e.g. "Sentence" is not clipped by "Sent").
-    """
+    """Strip email-client UI chrome from OCR-extracted text."""
     for phrase in UI_NOISE_WORDS:
         pattern = r"(?<!\w)" + re.escape(phrase) + r"(?!\w)"
         text = re.sub(pattern, " ", text)
@@ -85,10 +80,7 @@ def _build_explanation(signals: dict, score: float, label: str) -> str:
 
 
 class PhishingDetectionPipeline:
-    """End-to-end phishing detection pipeline accepting text, image, or both.
-
-    All models are loaded lazily; missing checkpoints are skipped with a warning.
-    """
+    """End-to-end phishing detection pipeline for text, image, or both (models loaded lazily)."""
 
     def __init__(self, models_dir: str | Path = "models"):
         self.models_dir = Path(models_dir)
@@ -197,11 +189,7 @@ class PhishingDetectionPipeline:
         text: Optional[str] = None,
         image_path: Optional[str | Path] = None,
     ) -> dict:
-        """Run the full phishing detection pipeline on text, an image, or both.
-
-        At least one of text or image_path must be provided. For image-only input,
-        text is extracted by OCR and cleaned with remove_ui_noise() before classification.
-        """
+        """Run the full pipeline on text, an image, or both."""
         if text is None and image_path is None:
             raise ValueError("At least one of text or image_path must be provided.")
 

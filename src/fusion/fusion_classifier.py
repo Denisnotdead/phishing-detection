@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 FEATURE_COLS = ["xgb_prob", "bert_prob", "ocr_confidence", "is_image_input"]
 
-# Fallback weights for weighted-average when LightGBM model is not yet trained.
-# BERT gets a slightly higher weight because it operates on raw semantics.
+# fallback weights for the untrained weighted-average path
 _FALLBACK_WEIGHTS = {
     "xgb_prob":       0.40,
     "bert_prob":       0.45,
@@ -24,11 +23,7 @@ _FALLBACK_WEIGHTS = {
 
 
 def confidence_tier(prob: float) -> str:
-    """Map a phishing probability to a human-readable confidence label.
-
-    Distance from 0.5 is used so both sides of the boundary are treated symmetrically:
-    LOW (<0.10 from 0.5), MEDIUM (0.10–0.35), HIGH (>0.35).
-    """
+    """Map a phishing probability to a LOW/MEDIUM/HIGH confidence label."""
     distance = abs(prob - 0.5)
     if distance < 0.10:
         return "LOW"
@@ -38,10 +33,7 @@ def confidence_tier(prob: float) -> str:
 
 
 class FusionClassifier:
-    """LightGBM meta-classifier fusing XGBoost, DistilBERT, and image signals.
-
-    Falls back to a weighted average of input signals until a model is trained and saved.
-    """
+    """LightGBM meta-classifier fusing XGBoost, DistilBERT and image signals; weighted-average fallback until trained."""
 
     def __init__(
         self,
@@ -82,11 +74,11 @@ class FusionClassifier:
         n_pos = int(y.sum())
         n_neg = len(y) - n_pos
 
+        # no scale_pos_weight — base models already correct for imbalance, so re-weighting double-corrects and skews the threshold
         self._model = lgb.LGBMClassifier(
             n_estimators=self.n_estimators,
             learning_rate=self.learning_rate,
             max_depth=self.max_depth,
-            scale_pos_weight=n_neg / max(n_pos, 1),
             random_state=42,
             n_jobs=-1,
             verbose=-1,
@@ -101,10 +93,7 @@ class FusionClassifier:
         return self
 
     def predict_proba(self, signals: dict | pd.DataFrame) -> float:
-        """Return the phishing probability for one set of input signals.
-
-        Falls back to a weighted average with a warning if the model is not trained.
-        """
+        """Return the phishing probability for one set of input signals."""
         if isinstance(signals, dict):
             row = pd.DataFrame([signals])[FEATURE_COLS]
         else:
@@ -122,10 +111,7 @@ class FusionClassifier:
         return prob
 
     def _weighted_average_fallback(self, signals: dict) -> float:
-        """Compute a weighted average when no trained model is available.
-
-        OCR confidence is excluded for text-only inputs to avoid diluting the text scores.
-        """
+        """Weighted average of signals used when no trained model is available."""
         if signals.get("is_image_input", 0):
             total_weight = sum(_FALLBACK_WEIGHTS.values())
             prob = sum(
